@@ -5,13 +5,7 @@
     "main": "kahoot.js",
     "scripts": {
         "start": "node kahoot.js",
-        "web": "node server.js",
-        "deploy": "cd functions && npm install && cd .. && firebase deploy",
-        "deploy:hosting": "firebase deploy --only hosting",
-        "deploy:functions": "cd functions && npm install && cd .. && firebase deploy --only functions",
-        "firebase:init": "firebase init",
-        "firebase:login": "firebase login",
-        "firebase:logs": "firebase functions:log"
+        "mobile": "node kahoot-mobile.js"
     },
     "dependencies": {
         "an-array-of-english-words": "^2.0.0",
