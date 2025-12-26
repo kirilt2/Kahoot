@@ -8,6 +8,17 @@ const chalk = require('chalk');
 
 setTitle('Kahoot Bot Flooder');
 
+/*
+ * BOT CONFIGURATION:
+ * - Auto-leave timer: 5 MINUTES (300 seconds)
+ * - Answer delay: 1-180 seconds (supports Kahoot questions up to 4 minutes)
+ * - Bots stay connected even after quiz ends
+ * 
+ * KAHOOT CREATOR TIP:
+ * Set question time limits to maximum (240 seconds/4 minutes) 
+ * for best bot performance and longer game sessions
+ */
+
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -65,7 +76,8 @@ function applyNameBypass(name) {
         'w': 'ᗯ',
         'x': '᙭',
         'y': 'Y',
-        'z': 'ᘔ'
+        'z': 'ᘔ',
+        '1': 'ᗺ',
     };
     let result = name;
     for (const [letter, replacement] of Object.entries(replacements)) {
@@ -82,7 +94,7 @@ console.log(chalk.cyan('══════════════════�
 console.log(chalk.cyan('                                                    '));
 console.log(chalk.bold.cyan('        KAHOOT BOT BOBER'));
 console.log(chalk.cyan('                                                    '));
-console.log(chalk.yellow('     Bots will auto-leave after 2 minutes       '));
+console.log(chalk.yellow('     Bots will auto-leave after 5 minutes       '));
 console.log(chalk.cyan('                                                    '));
 console.log(chalk.cyan('════════════════════════════════════════════════════'));
 console.log('\n');
@@ -142,7 +154,7 @@ function sendjoin(name, id) {
 function spam() {
     if (repeattimes >= bots) {
         console.log(chalk.green("\n[SUCCESS] All bots initialized successfully!"));
-        console.log(chalk.yellow("[INFO] Auto-leave timer: 2 minutes\n"));
+        console.log(chalk.yellow("[INFO] Auto-leave timer: 5 minutes\n"));
         return;
     }
 
@@ -178,11 +190,18 @@ function join(name, idee) {
     const nickname = [random.first(), random.last()];
 
     client.join(pin, finalName, nickname).catch(err => {
-        if (err && err.description === "Duplicate name" && ranname) {
-            sendjoin(name, idee);
+        if (err && err.description === "Duplicate name") {
+            // Always use a new random name on duplicate, regardless of ranname setting
+            join(getName(), idee);
         } else {
             const errorMsg = err && err.description ? err.description : "Unknown error";
             console.log(chalk.red(`[FAILED] Client ${idee} (${name}): ${errorMsg}`));
+
+            // Check for specific errors that indicate the game is full or unavailable
+            if (errorMsg.includes("full") || errorMsg.includes("capacity") || errorMsg.includes("locked") || errorMsg.includes("not found")) {
+                console.log(chalk.red(`[ERROR] Game may be full or unavailable!`));
+            }
+
             try {
                 client.leave();
             } catch (e) {}
@@ -209,6 +228,10 @@ function join(name, idee) {
                 clearInterval(twoFactorInterval);
             });
         }
+    });
+
+    client.on("Error", error => {
+        console.log(chalk.red(`[ERROR] ${name} - ${error.message || error}`));
     });
 
     client.on("TwoFactorCorrect", () => {
@@ -248,7 +271,7 @@ function join(name, idee) {
                             try {
                                 client.answer(sharedAnswer - 1);
                             } catch (e) {}
-                        }, getRandomInt(1, 20000));
+                        }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                     } else {
                         const waitInterval = setInterval(() => {
                             if (sharedAnswer !== null) {
@@ -257,7 +280,7 @@ function join(name, idee) {
                                     try {
                                         client.answer(sharedAnswer - 1);
                                     } catch (e) {}
-                                }, getRandomInt(1, 20000));
+                                }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                             }
                         }, 100);
                     }
@@ -267,7 +290,7 @@ function join(name, idee) {
                         try {
                             client.answer(toanswer);
                         } catch (e) {}
-                    }, getRandomInt(1, 20000));
+                    }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                 }
             }
 
@@ -280,7 +303,7 @@ function join(name, idee) {
                             try {
                                 client.answer(answer);
                             } catch (e) {}
-                        }, getRandomInt(1, 20000));
+                        }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                     } else {
                         const waitInterval = setInterval(() => {
                             if (sharedAnswer !== null) {
@@ -289,7 +312,7 @@ function join(name, idee) {
                                     try {
                                         client.answer(sharedAnswer);
                                     } catch (e) {}
-                                }, getRandomInt(1, 20000));
+                                }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                             }
                         }, 100);
                     }
@@ -298,7 +321,7 @@ function join(name, idee) {
                         try {
                             client.answer("kahootflood.weebly.com");
                         } catch (e) {}
-                    }, getRandomInt(1, 20000));
+                    }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                 }
             }
 
@@ -324,7 +347,7 @@ function join(name, idee) {
                             try {
                                 client.answer(sharedAnswer - 1);
                             } catch (e) {}
-                        }, getRandomInt(1, 20000));
+                        }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                     } else {
                         const waitInterval = setInterval(() => {
                             if (sharedAnswer !== null) {
@@ -333,7 +356,7 @@ function join(name, idee) {
                                     try {
                                         client.answer(sharedAnswer - 1);
                                     } catch (e) {}
-                                }, getRandomInt(1, 20000));
+                                }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                             }
                         }, 100);
                     }
@@ -343,7 +366,7 @@ function join(name, idee) {
                         try {
                             client.answer(toanswer);
                         } catch (e) {}
-                    }, getRandomInt(1, 20000));
+                    }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                 }
             }
 
@@ -356,7 +379,7 @@ function join(name, idee) {
                             try {
                                 client.answer(answer);
                             } catch (e) {}
-                        }, getRandomInt(1, 20000));
+                        }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                     } else {
                         const waitInterval = setInterval(() => {
                             if (sharedAnswer !== null) {
@@ -365,7 +388,7 @@ function join(name, idee) {
                                     try {
                                         client.answer(sharedAnswer);
                                     } catch (e) {}
-                                }, getRandomInt(1, 20000));
+                                }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                             }
                         }, 100);
                     }
@@ -374,16 +397,25 @@ function join(name, idee) {
                         try {
                             client.answer("kahootflood.weebly.com");
                         } catch (e) {}
-                    }, getRandomInt(1, 20000));
+                    }, getRandomInt(1, 180000)); // Up to 3 minutes for long Kahoot questions
                 }
             }
         } catch (error) {}
     });
 
     client.on("Disconnect", reason => {
-        if (reason !== "Quiz Locked") {
-            sendjoin(name, idee);
+        if (reason === "Quiz Locked") {
+            console.log(chalk.red(`[KICKED] ${name} - Game is locked`));
+        } else if (reason === "Game Full") {
+            console.log(chalk.red(`[ERROR] ${name} - Game is full, cannot rejoin`));
+        } else if (reason && reason !== "normal" && reason !== "Quiz Locked") {
+            console.log(chalk.red(`[DISCONNECTED] ${name} - Reason: ${reason}`));
+            // Only rejoin if it's an unexpected disconnection, not a normal end
+            if (reason !== "Game ended" && reason !== "Quiz ended") {
+                sendjoin(name, idee);
+            }
         }
+        // Don't rejoin on normal disconnections - let bots stay until auto-leave timer
     });
 
     client.on("QuestionEnd", data => {
@@ -398,11 +430,13 @@ function join(name, idee) {
         if (data && data.rank) {
             console.log(chalk.cyan(`[FINISHED] ${name} finished with rank #${data.rank}`));
         }
+        console.log(chalk.gray(`[STAYING] ${name} staying in game until auto-leave timer...`));
+        // Don't leave - wait for auto-leave timer (5 minutes)
     });
 }
 
 function leaveAllBots() {
-    console.log(chalk.yellow('\n[INFO] 2 minutes elapsed. Leaving all bots...\n'));
+    console.log(chalk.yellow('\n[INFO] 5 minutes elapsed. Leaving all bots...\n'));
     let leftCount = 0;
     allClients.forEach(client => {
         try {
@@ -428,11 +462,11 @@ console.log(chalk.bold.cyan('  INITIALIZING BOTS...'));
 console.log(chalk.cyan('════════════════════════════════════════\n'));
 console.log(chalk.cyan(`Game PIN: ${pin}`));
 console.log(chalk.cyan(`Number of bots: ${bots}`));
-console.log(chalk.yellow(`Auto-leave: 2 minutes\n`));
+console.log(chalk.yellow(`Auto-leave: 5 minutes\n`));
 console.log(chalk.gray('Connecting...\n'));
 
 spam();
 
 setTimeout(() => {
     leaveAllBots();
-}, 120000);
+}, 300000); // 5 minutes = 300000 milliseconds
