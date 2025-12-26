@@ -1,11 +1,14 @@
 {
     "name": "kahoot-bot-flooder",
     "version": "1.0.0",
-    "description": "Kahoot bot flooder",
-    "main": "kahoot.js",
+    "description": "Kahoot bot flooder web panel by Kiril Tichomirov",
+    "main": "server.js",
+    "engines": {
+        "node": ">=18.x"
+    },
     "scripts": {
-        "start": "node kahoot.js",
-        "mobile": "node kahoot-mobile.js"
+        "start": "node server.js",
+        "cli": "node kahoot.js"
     },
     "dependencies": {
         "an-array-of-english-words": "^2.0.0",
@@ -23,6 +26,6 @@
         "bot",
         "flooder"
     ],
-    "author": "",
+    "author": "Kiril Tichomirov",
     "license": "ISC"
 }

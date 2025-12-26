@@ -92,16 +92,12 @@ console.clear();
 console.log('\n');
 console.log(chalk.cyan('════════════════════════════════════════════════════'));
 console.log(chalk.cyan('                                                    '));
-console.log(chalk.bold.cyan('        KAHOOT BOT BOBER'));
-console.log(chalk.cyan('                                                    '));
-console.log(chalk.yellow('     Bots will auto-leave after 5 minutes       '));
+console.log(chalk.bold.cyan('        KAHOOT BOT FLOODER'));
 console.log(chalk.cyan('                                                    '));
 console.log(chalk.cyan('════════════════════════════════════════════════════'));
 console.log('\n');
 
-readline.question(chalk.gray('Press ENTER to start...'));
-console.clear();
-
+// Bot flooding mode only
 let antibotmode = readline.question(chalk.cyan('Use antibot mode? (y/n): '));
 if (antibotmode === "y") {
     console.log(chalk.yellow("Note: 2-factor brute forcing doesn't work with antibot mode.\n"));

@@ -1,4 +1,6 @@
 node_modules/
+.env
 *.log
 .DS_Store
-
+kahoot_answers_*.txt
+KahootThing/

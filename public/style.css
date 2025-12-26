@@ -1,0 +1,677 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a0a0a;
+    background-image: radial-gradient(at 40% 20%, rgba(80, 0, 0, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(60, 0, 20, 0.4) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(100, 0, 30, 0.3) 0px, transparent 50%);
+    min-height: 100vh;
+    color: #ffcccc;
+    overflow-x: hidden;
+}
+
+
+/* Screen Management */
+
+.screen {
+    display: none !important;
+}
+
+.screen.active {
+    display: block !important;
+}
+
+
+/* Password Screen */
+
+#password-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 1000;
+    background: #1a0a0a;
+}
+
+#password-screen.active {
+    display: flex !important;
+}
+
+.password-container {
+    background: #1f0f0f;
+    border: 1px solid #551111;
+    border-radius: 12px;
+    padding: 50px 40px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(150, 0, 0, 0.2);
+    text-align: center;
+}
+
+.logo h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    color: #ff6b6b;
+    text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+    font-weight: 600;
+}
+
+.logo p {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
+    color: #ffaaaa;
+}
+
+.password-form input {
+    width: 100%;
+    padding: 18px 20px;
+    border: 1px solid #551111;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    background: #1a0a0a;
+    color: #ffcccc;
+    transition: all 0.3s ease;
+    text-align: center;
+    letter-spacing: 3px;
+}
+
+.password-form input:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    background: #1f0f0f;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+}
+
+.password-form input::placeholder {
+    color: #6a3a3a;
+    letter-spacing: normal;
+}
+
+.password-form button {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background: #cc2222;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.password-form button:hover {
+    background: #ee3333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 50, 50, 0.5);
+}
+
+.password-form button:active {
+    transform: translateY(0);
+}
+
+.password-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error-message {
+    color: #ff6b6b;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    min-height: 20px;
+}
+
+
+/* Main Panel */
+
+#main-panel {
+    min-height: 100vh;
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+}
+
+#main-panel.active {
+    display: flex !important;
+    opacity: 1 !important;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-size: 2.8rem;
+    margin-bottom: 8px;
+    color: #ff6b6b;
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+    font-weight: 600;
+}
+
+.subtitle {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    color: #ffaaaa;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 25px;
+    flex: 1;
+    align-items: start;
+}
+
+
+/* Configuration Panel */
+
+.config-panel {
+    background: #1f0f0f;
+    border: 1px solid #551111;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(150, 0, 0, 0.15);
+}
+
+.config-panel h2 {
+    margin-bottom: 25px;
+    font-size: 1.6rem;
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #ffcccc;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #551111;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #1a0a0a;
+    color: #ffcccc;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    background: #1f0f0f;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+}
+
+.form-group input::placeholder {
+    color: #6a3a3a;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.checkbox-group label:hover {
+    background: rgba(255, 107, 107, 0.15);
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: #cc2222;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-primary {
+    background: #22aa22;
+    color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #33cc33;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(50, 200, 50, 0.5);
+}
+
+.btn-danger {
+    background: #cc2222;
+    color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #ee3333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 50, 50, 0.5);
+}
+
+.btn-small {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background: #551111;
+    color: #ffcccc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.btn-small:hover {
+    background: #771111;
+    transform: scale(1.05);
+}
+
+.btn-small:active {
+    transform: scale(0.98);
+}
+
+
+/* Answer Control */
+
+#answer-control {
+    margin-top: 25px;
+    padding: 25px;
+    background: #1a0a0a;
+    border-radius: 8px;
+    border: 1px solid #551111;
+}
+
+#answer-control h3 {
+    margin-bottom: 18px;
+    font-size: 1.3rem;
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.answer-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.answer-btn {
+    padding: 18px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.answer-btn:hover {
+    transform: scale(1.05);
+}
+
+.answer-btn.triangle {
+    background: #cc2222;
+}
+
+.answer-btn.triangle:hover {
+    background: #ee3333;
+}
+
+.answer-btn.diamond {
+    background: #2277cc;
+}
+
+.answer-btn.diamond:hover {
+    background: #3388dd;
+}
+
+.answer-btn.circle {
+    background: #ccaa22;
+    color: #1e1e1e;
+}
+
+.answer-btn.circle:hover {
+    background: #ddbb33;
+}
+
+.answer-btn.square {
+    background: #22cc77;
+}
+
+.answer-btn.square:hover {
+    background: #33dd88;
+}
+
+#text-answer-input {
+    margin-top: 15px;
+}
+
+#text-answer {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #551111;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #1f0f0f;
+    color: #ffcccc;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+#text-answer:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+}
+
+
+/* Terminal Panel */
+
+.terminal-panel {
+    background: #1f0f0f;
+    border: 1px solid #551111;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(150, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 280px);
+    min-height: 500px;
+}
+
+.terminal-header {
+    background: #2a1515;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+    border-bottom: 1px solid #551111;
+}
+
+.terminal-header span:first-child {
+    color: #ff6b6b;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.terminal {
+    flex: 1;
+    padding: 20px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    overflow-y: auto;
+    line-height: 1.8;
+    background: #1a0a0a;
+}
+
+.terminal-line {
+    margin-bottom: 6px;
+    word-wrap: break-word;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.terminal-line.success {
+    color: #4ec9b0;
+    background: rgba(78, 201, 176, 0.1);
+    border-left: 3px solid #4ec9b0;
+}
+
+.terminal-line.error {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border-left: 3px solid #ff6b6b;
+}
+
+.terminal-line.warning {
+    color: #ffcc77;
+    background: rgba(255, 204, 119, 0.1);
+    border-left: 3px solid #ffcc77;
+}
+
+.terminal-line.info {
+    color: #9cdcfe;
+    background: rgba(156, 220, 254, 0.1);
+    border-left: 3px solid #9cdcfe;
+}
+
+
+/* Footer */
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    opacity: 0.6;
+    font-size: 0.9rem;
+    color: #ffaaaa;
+    flex-shrink: 0;
+}
+
+
+/* Scrollbar Styling */
+
+.terminal::-webkit-scrollbar {
+    width: 10px;
+}
+
+.terminal::-webkit-scrollbar-track {
+    background: #1a0a0a;
+}
+
+.terminal::-webkit-scrollbar-thumb {
+    background: #551111;
+    border-radius: 5px;
+}
+
+.terminal::-webkit-scrollbar-thumb:hover {
+    background: #771111;
+}
+
+
+/* Responsive Design - Tablet */
+
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .terminal-panel {
+        max-height: 500px;
+        min-height: 400px;
+    }
+}
+
+
+/* Responsive Design - Mobile */
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    .header h1 {
+        font-size: 2rem;
+    }
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .config-panel,
+    .terminal-panel {
+        padding: 25px 20px;
+    }
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .btn {
+        padding: 16px;
+        font-size: 1rem;
+    }
+    .btn-small {
+        padding: 12px 24px;
+        font-size: 1rem;
+        min-width: 100px;
+    }
+    .answer-buttons {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .logo h1 {
+        font-size: 1.8rem;
+    }
+    .password-container {
+        padding: 40px 30px;
+    }
+    .password-form input,
+    .password-form button {
+        padding: 16px;
+        font-size: 1rem;
+    }
+    .terminal {
+        font-size: 0.85rem;
+        padding: 15px;
+    }
+    .terminal-panel {
+        max-height: 400px;
+        min-height: 350px;
+    }
+    .terminal-header {
+        padding: 14px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #main-panel {
+        padding: 15px;
+    }
+    .header {
+        margin-bottom: 15px;
+    }
+    .header h1 {
+        font-size: 1.6rem;
+    }
+    .config-panel,
+    .terminal-panel {
+        padding: 20px 15px;
+        border-radius: 6px;
+    }
+    .config-panel h2 {
+        font-size: 1.3rem;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group input {
+        padding: 14px;
+        font-size: 1rem;
+    }
+    .btn {
+        padding: 14px;
+        font-size: 1rem;
+    }
+    .btn-small {
+        padding: 14px 28px;
+        font-size: 1.05rem;
+        min-width: 120px;
+        font-weight: bold;
+    }
+    .terminal {
+        font-size: 0.85rem;
+        padding: 12px;
+    }
+    .terminal-panel {
+        max-height: 350px;
+        min-height: 300px;
+    }
+    .terminal-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    .terminal-header span:first-child {
+        font-size: 1rem;
+    }
+    .password-container {
+        padding: 35px 25px;
+    }
+    .logo h1 {
+        font-size: 1.5rem;
+    }
+    .password-form input {
+        font-size: 1rem;
+        padding: 15px;
+    }
+    .password-form button {
+        font-size: 1rem;
+        padding: 16px;
+    }
+    .footer {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+}
+
+.config-panel,
+.terminal-panel {
+    opacity: 1 !important;
+}
