@@ -1,4 +1,9 @@
+// Kahoot Bot Flooder - Simple Version
+// By Kiril Tichomirov
+
 let socket;
+let isRunning = false;
+let currentQuestionType = null;
 
 // DOM Elements
 const passwordScreen = document.getElementById('password-screen');
@@ -20,90 +25,72 @@ const stopBtn = document.getElementById('stop-btn');
 const terminal = document.getElementById('terminal');
 const clearTerminalBtn = document.getElementById('clear-terminal');
 
+const progressContainer = document.getElementById('progress-container');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+
 const answerControl = document.getElementById('answer-control');
 const answerButtons = document.getElementById('answer-buttons');
 const textAnswerInput = document.getElementById('text-answer-input');
 const textAnswer = document.getElementById('text-answer');
 const submitTextAnswer = document.getElementById('submit-text-answer');
 
-let isRunning = false;
-let currentQuestionType = null;
+// ==================== PASSWORD VERIFICATION ====================
 
-// Password Authentication
-passwordSubmit.addEventListener('click', verifyPassword);
 passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') verifyPassword();
 });
 
+passwordSubmit.addEventListener('click', verifyPassword);
+
 async function verifyPassword() {
-    const password = passwordInput.value.trim();
+    const password = passwordInput.value;
 
     if (!password) {
-        passwordError.textContent = 'Please enter a password!';
+        passwordError.textContent = 'Please enter password!';
         return;
     }
 
-    passwordError.textContent = '';
     passwordSubmit.disabled = true;
-    passwordSubmit.textContent = 'CHECKING...';
+    passwordSubmit.textContent = 'Checking...';
+    passwordError.textContent = '';
 
     try {
         const response = await fetch('/verify-password', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ password: password })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
         });
-
-        if (!response.ok) {
-            throw new Error('Server error');
-        }
 
         const data = await response.json();
 
         if (data.success) {
-            console.log('Password correct! Switching to main panel...');
-
-            // Immediately switch screens
             passwordScreen.classList.remove('active');
-            passwordScreen.style.display = 'none';
-
-            mainPanel.style.display = 'flex';
             mainPanel.classList.add('active');
-
-            passwordError.textContent = '';
-
-            // Initialize socket connection after successful login
             initializeSocket();
-
-            console.log('Main panel is now visible');
         } else {
-            passwordError.textContent = 'Invalid password! Try: 2010';
-            passwordInput.value = '';
-            passwordInput.focus();
+            passwordError.textContent = 'Incorrect password!';
         }
     } catch (error) {
-        console.error('Password verification error:', error);
-        passwordError.textContent = 'Connection error! Is the server running?';
+        passwordError.textContent = 'Connection error!';
     } finally {
         passwordSubmit.disabled = false;
         passwordSubmit.textContent = 'UNLOCK';
     }
 }
 
+// ==================== SOCKET CONNECTION ====================
+
 function initializeSocket() {
     socket = io();
 
     socket.on('connect', () => {
-        addLog('success', '✓ Connected to server!');
+        addLog('success', 'Connected to server!');
     });
 
     socket.on('disconnect', () => {
-        addLog('error', '✗ Disconnected from server!');
-        if (isRunning) {
-            resetUI();
-        }
+        addLog('error', 'Disconnected from server!');
+        if (isRunning) resetUI();
     });
 
     socket.on('log', (data) => {
@@ -111,7 +98,8 @@ function initializeSocket() {
     });
 
     socket.on('bots-ready', () => {
-        addLog('success', '✓ All bots are ready and connected!');
+        addLog('success', 'All bots deployed successfully!');
+        hideProgress();
     });
 
     socket.on('question-ready', (data) => {
@@ -120,30 +108,28 @@ function initializeSocket() {
             showAnswerControl(data);
         }
     });
+
+    socket.on('bot-progress', (data) => {
+        updateProgress(data.current, data.total);
+    });
 }
 
-// Toggle bot name input based on random names checkbox
-randomNamesCheckbox.addEventListener('change', () => {
-    if (randomNamesCheckbox.checked) {
-        botNameGroup.style.display = 'none';
-    } else {
-        botNameGroup.style.display = 'block';
-    }
-});
+// ==================== BOT CONTROLS ====================
 
-// Clear terminal
-clearTerminalBtn.addEventListener('click', () => {
-    terminal.innerHTML = '<div class="terminal-line info">Terminal cleared.</div>';
-});
+startBtn.addEventListener('click', startBots);
+stopBtn.addEventListener('click', stopBots);
 
-// Start Bots
-startBtn.addEventListener('click', () => {
+function startBots() {
+    console.log('Start button clicked!');
+
     const pin = gamePinInput.value.trim();
     const bots = parseInt(numBotsInput.value, 10);
     const randomNames = randomNamesCheckbox.checked;
     const botName = botNameInput.value.trim();
     const useBypass = useBypassCheckbox.checked;
     const userControlled = userControlledCheckbox.checked;
+
+    console.log('Config:', { pin, bots, randomNames, botName, useBypass, userControlled });
 
     if (!pin) {
         addLog('error', 'Please enter a game PIN!');
@@ -160,23 +146,18 @@ startBtn.addEventListener('click', () => {
         return;
     }
 
-    if (!socket || !socket.connected) {
-        addLog('error', 'Not connected to server! Please refresh the page.');
-        return;
-    }
-
+    console.log('Starting bots...');
     isRunning = true;
+
     startBtn.disabled = true;
     stopBtn.disabled = false;
     gamePinInput.disabled = true;
     numBotsInput.disabled = true;
-    randomNamesCheckbox.disabled = true;
-    botNameInput.disabled = true;
-    useBypassCheckbox.disabled = true;
-    userControlledCheckbox.disabled = true;
 
+    showProgress();
     terminal.innerHTML = '';
 
+    console.log('Emitting start-bots event...');
     socket.emit('start-bots', {
         pin,
         bots,
@@ -185,15 +166,14 @@ startBtn.addEventListener('click', () => {
         useBypass,
         userControlled
     });
-});
+    console.log('Event emitted!');
+}
 
-// Stop Bots
-stopBtn.addEventListener('click', () => {
-    if (socket && socket.connected) {
-        socket.emit('stop-bots');
-    }
+function stopBots() {
+    socket.emit('stop-bots');
+    addLog('info', 'Stopping bots...');
     resetUI();
-});
+}
 
 function resetUI() {
     isRunning = false;
@@ -201,81 +181,87 @@ function resetUI() {
     stopBtn.disabled = true;
     gamePinInput.disabled = false;
     numBotsInput.disabled = false;
-    randomNamesCheckbox.disabled = false;
-    botNameInput.disabled = false;
-    useBypassCheckbox.disabled = false;
-    userControlledCheckbox.disabled = false;
+    hideProgress();
     answerControl.style.display = 'none';
 }
+
+// ==================== TERMINAL ====================
 
 function addLog(type, message) {
     const line = document.createElement('div');
     line.className = `terminal-line ${type}`;
-    line.textContent = message;
+
+    const timestamp = new Date().toLocaleTimeString();
+    line.textContent = `[${timestamp}] ${message}`;
+
     terminal.appendChild(line);
     terminal.scrollTop = terminal.scrollHeight;
 }
 
+clearTerminalBtn.addEventListener('click', () => {
+    terminal.innerHTML = '<div class="terminal-line info">Terminal cleared.</div>';
+});
+
+// ==================== PROGRESS ====================
+
+function showProgress() {
+    progressContainer.style.display = 'block';
+}
+
+function hideProgress() {
+    progressContainer.style.display = 'none';
+}
+
+function updateProgress(current, total) {
+    const percentage = (current / total) * 100;
+    progressFill.style.width = percentage + '%';
+    progressText.textContent = `${current}/${total}`;
+}
+
+// ==================== ANSWER CONTROL ====================
+
 function showAnswerControl(data) {
     answerControl.style.display = 'block';
+    answerButtons.innerHTML = '';
+    textAnswerInput.style.display = 'none';
 
-    if (data.type === 'quiz' || data.type === 'survey') {
-        textAnswerInput.style.display = 'none';
-        answerButtons.style.display = 'grid';
-        answerButtons.innerHTML = '';
-
-        const answers = [
-            { text: '🔺 Triangle (Red)', class: 'triangle', value: 0 },
-            { text: '🔷 Diamond (Blue)', class: 'diamond', value: 1 },
-            { text: '⭕ Circle (Yellow)', class: 'circle', value: 2 },
-            { text: '🟩 Square (Green)', class: 'square', value: 3 }
-        ];
-
-        const count = Math.min(data.answerCount, 4);
-
-        for (let i = 0; i < count; i++) {
+    if (data.type === 'quiz' || data.type === 'true_false') {
+        data.answers.forEach((answer, index) => {
             const btn = document.createElement('button');
-            btn.className = `answer-btn ${answers[i].class}`;
-            btn.textContent = answers[i].text;
-            btn.onclick = () => submitAnswer(answers[i].value);
+            btn.className = `answer-btn answer-${index}`;
+            btn.textContent = answer || `Answer ${index + 1}`;
+            btn.onclick = () => submitAnswer(index);
             answerButtons.appendChild(btn);
-        }
-
-        addLog('info', `Question ready! Select an answer (${count} options)`);
+        });
     } else if (data.type === 'word_cloud' || data.type === 'open_ended') {
-        answerButtons.style.display = 'none';
         textAnswerInput.style.display = 'block';
-        textAnswer.value = '';
-        textAnswer.focus();
-
-        addLog('info', 'Question ready! Type your answer.');
     }
 }
 
-function submitAnswer(answerValue) {
-    if (socket && socket.connected) {
-        socket.emit('submit-answer', answerValue);
-        addLog('success', `Submitted answer: ${answerValue + 1}`);
-        answerControl.style.display = 'none';
-    }
+function submitAnswer(answerIndex) {
+    socket.emit('submit-answer', { answer: answerIndex });
+    addLog('info', `Submitted answer: ${answerIndex}`);
+    answerControl.style.display = 'none';
 }
 
 submitTextAnswer.addEventListener('click', () => {
     const answer = textAnswer.value.trim();
-    if (answer && socket && socket.connected) {
-        socket.emit('submit-text-answer', answer);
-        addLog('success', `Submitted answer: ${answer}`);
+    if (answer) {
+        socket.emit('submit-answer', { answer });
+        addLog('info', `Submitted answer: ${answer}`);
+        textAnswer.value = '';
         answerControl.style.display = 'none';
     }
 });
 
-textAnswer.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        submitTextAnswer.click();
-    }
+// ==================== UI TOGGLES ====================
+
+randomNamesCheckbox.addEventListener('change', () => {
+    botNameGroup.style.display = randomNamesCheckbox.checked ? 'none' : 'block';
 });
 
-// Auto-focus password input on load
-window.addEventListener('load', () => {
-    passwordInput.focus();
+userControlledCheckbox.addEventListener('change', () => {
+    if (!userControlledCheckbox.checked) {
+        answerControl.style.display = 'none';
+    }
 });

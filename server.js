@@ -116,6 +116,7 @@ io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
     socket.on('start-bots', (config) => {
+        console.log('Received start-bots event:', config);
         const { pin, bots, randomNames, botName, useBypass, userControlled } = config;
 
         socket.emit('log', { type: 'info', message: '════════════════════════════════════════' });
@@ -125,17 +126,23 @@ io.on('connection', (socket) => {
         socket.emit('log', { type: 'info', message: `Number of bots: ${bots}` });
         socket.emit('log', { type: 'info', message: `Auto-leave: 5 minutes` });
         socket.emit('log', { type: 'info', message: 'Connecting...' });
+        console.log('Logs emitted, creating session...');
 
         const sessionData = {
             clients: [],
             sharedAnswer: null,
             repeattimes: 0,
-            userControlled: userControlled
+            userControlled: userControlled,
+            isStopped: false,
+            timeouts: []
         };
 
         activeSessions.set(socket.id, sessionData);
 
         function sendjoin(name, id) {
+            // Check if stopped before joining
+            if (sessionData.isStopped) return;
+
             if (randomNames) {
                 join(getName(), id);
             } else {
@@ -144,6 +151,9 @@ io.on('connection', (socket) => {
         }
 
         function spam() {
+            // Check if stopped
+            if (sessionData.isStopped) return;
+
             if (sessionData.repeattimes >= bots) {
                 socket.emit('log', { type: 'success', message: 'All bots initialized successfully!' });
                 socket.emit('log', { type: 'info', message: 'Auto-leave timer: 5 minutes' });
@@ -152,19 +162,27 @@ io.on('connection', (socket) => {
             }
 
             sessionData.repeattimes++;
+
+            // Emit progress
+            socket.emit('bot-progress', { current: sessionData.repeattimes, total: bots });
+
             const delay = randomNames ? getRandomInt(90, 200) : 15;
 
-            setTimeout(() => {
-                spam();
+            const timeout1 = setTimeout(() => {
+                if (!sessionData.isStopped) spam();
             }, delay);
+            sessionData.timeouts.push(timeout1);
 
-            setTimeout(() => {
-                if (randomNames) {
-                    sendjoin("Random Name", bots - sessionData.repeattimes);
-                } else {
-                    sendjoin(botName + (bots - sessionData.repeattimes), bots - sessionData.repeattimes);
+            const timeout2 = setTimeout(() => {
+                if (!sessionData.isStopped) {
+                    if (randomNames) {
+                        sendjoin("Random Name", bots - sessionData.repeattimes);
+                    } else {
+                        sendjoin(botName + (bots - sessionData.repeattimes), bots - sessionData.repeattimes);
+                    }
                 }
             }, delay);
+            sessionData.timeouts.push(timeout2);
         }
 
         function join(name, idee) {
@@ -352,6 +370,7 @@ io.on('connection', (socket) => {
         }
 
         spam();
+        console.log('spam() function called!');
 
         // Auto-leave after 5 minutes
         setTimeout(() => {
@@ -372,6 +391,16 @@ io.on('connection', (socket) => {
         const sessionData = activeSessions.get(socket.id);
         if (sessionData) {
             socket.emit('log', { type: 'info', message: 'Stopping all bots...' });
+
+            // Mark session as stopped to prevent new bots from joining
+            sessionData.isStopped = true;
+
+            // Clear all pending timeouts to stop bots from joining
+            if (sessionData.timeouts) {
+                sessionData.timeouts.forEach(timeout => clearTimeout(timeout));
+                sessionData.timeouts = [];
+            }
+
             let leftCount = 0;
             sessionData.clients.forEach(client => {
                 try {
@@ -379,7 +408,7 @@ io.on('connection', (socket) => {
                     leftCount++;
                 } catch (e) {}
             });
-            socket.emit('log', { type: 'success', message: `${leftCount} bot(s) disconnected.` });
+            socket.emit('log', { type: 'success', message: `Stopped! ${leftCount} bot(s) disconnected.` });
             activeSessions.delete(socket.id);
         }
     });
@@ -399,6 +428,6 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🚀 Kahoot Bot Panel running on http://localhost:${PORT}`);
-    console.log(`🔐 Password: ${PASSWORD}`);
+    console.log(`Kahoot Bot Panel running on http://localhost:${PORT}`);
+    console.log(`Password: ${PASSWORD}`);
 });
